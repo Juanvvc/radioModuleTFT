@@ -72,6 +72,15 @@ Juan Vera, July 2020 */
 
 #define COLUMN2_WIDTH 110
 
+/////////////////// Formatting
+
+#define TYPE_INTEG 0
+#define TYPE_FREQU 1
+#define TYPE_ANGLE 2
+#define TYPE_TRANS 3
+#define TYPE_BARO 4
+#define TYPE_MAXCHARS 6
+
 ////////////////////////////////////// Encoders and buttons
 
 // my encoder has hardware stops every 4 internal positions. They are also used to avoid bouncing
@@ -118,30 +127,31 @@ struct Value {
   int fast;      // a movement in the encoder changes the position this time during fast mode
   long value;    // current value=offset+position*factor
   int swap;      // swap with this (relative) mode
+  byte type;     // TYPE_INTE, TYPE_ANGLE....
 };
 
 // current mode, from 0 to MAX_NODES
-// some modes are not possible: 0, 2, 4, 7: they are NOT editable COM1/COM2/NAV1/NAV2 frequencies
+// some modes are not possible: 0, 2, 4, 7 because they are not editable (COM1/COM2/NAV1/NAV2)
 // see setMode() and selectNextMode()
 int currentMode;
 
 Value availableValues[MAX_MODES] = {
-  // name, position, steps, offset, factor, fast, value(the initialization value is NOT calculated automatically. Set value=offset+position*factor), swap (+1=next, -1=prev, 0=no swap)
-  { "CO1", 0, 760, 118000, 0, 0, 118000, 1 }, // COM1: from 118.000 to 136.00. No change allowed (factor=0)
-  { "CO1S", 0, 760, 118000, 25, 40, 118000, -1 }, // COM1-STB: from 118.000 to 136.00. slow=25Khz (760 steps), fast=40*25=1000Khz
-  { "CO2", 380, 760, 118000, 0, 0, 127500, 1 }, // COM2: from 118.000 to 136.00. No change allowed (factor=0)
-  { "CO2S", 380, 760, 118000, 25, 40, 127500, -1 }, // COM2-STB: from 118.000 to 136.00. slow=25Khz (760 steps), fast=40*25=1000Khz
-  { "NA1", 0, 200, 108000, 0, 0, 108000, 1 }, // NAV1: from 108.000 to 118.00. No change allowed (factor=0)
-  { "NA1S", 0, 200, 108000, 50, 20, 108000, -1 }, // NAV1-STB: from 108.000 to 118.00. slow=50Khz (200 steps), fast=20*50=1000Khz
-  { "OBS1", 0, 360, 0, 1, 30, 0, 0 }, // OBS1: from 0 to 360, slow=1, fast=30
-  { "NA2", 100, 200, 108000, 0, 0, 113000, 1 }, // NAV2: from 108.000 to 118.00. No change allowed (factor=0)
-  { "NA2S", 100, 200, 108000, 50, 20, 113000, -1 }, // NAV2-STB: from 108.000 to 118.00. slow=50Khz (200 steps), fast=20*50=1000Khz
-  { "OBS2", 180, 360, 0, 1, 30, 180, 0 }, // OBS2: from 0 to 360, slow=1, fast=30
-  { "ADF", 0, 1560, 190, 1, 100, 190, 0 }, // ADF: from 190Hz to 1750Hz, slow=1Hz, fast=100Hz
-  { "TRANS", 0, 10000, 0, 1, 1000, 0, 0 }, // TRANSPONDER: from 0 to 9999, slow=1, fast=1000
-  { "HDG", 0, 360, 0, 1, 30, 0, 0 }, // HDG: from 0 to 360, slow=1, fast=30
-  // { "BARO", 0, 120, 945, 1, 10, 945, 0 } // BARO (hPA): from 945 to 1065, slow=1, fast=10
-  { "BARO", 0, 315, 2790, 1, 10, 2790, 0 } // BARO (inHg): from 2790 to 3105, slow=1, fast=10
+  // name, position, steps, offset, factor, fast, value(the initialization value is NOT calculated automatically. Set value=offset+position*factor), swap (+1=next, -1=prev, 0=no swap), type
+  { "CO1", 0, 760, 118000, 0, 0, 118000, 1, TYPE_FREQU }, // COM1: from 118.000 to 136.00. No change allowed (factor=0)
+  { "CO1S", 0, 760, 118000, 25, 40, 118000, -1, TYPE_FREQU }, // COM1-STB: from 118.000 to 136.00. slow=25Khz (760 steps), fast=40*25=1000Khz
+  { "CO2", 380, 760, 118000, 0, 0, 127500, 1, TYPE_FREQU }, // COM2: from 118.000 to 136.00. No change allowed (factor=0)
+  { "CO2S", 380, 760, 118000, 25, 40, 127500, -1, TYPE_FREQU }, // COM2-STB: from 118.000 to 136.00. slow=25Khz (760 steps), fast=40*25=1000Khz
+  { "NA1", 0, 200, 108000, 0, 0, 108000, 1, TYPE_FREQU }, // NAV1: from 108.000 to 118.00. No change allowed (factor=0)
+  { "NA1S", 0, 200, 108000, 50, 20, 108000, -1, TYPE_FREQU }, // NAV1-STB: from 108.000 to 118.00. slow=50Khz (200 steps), fast=20*50=1000Khz
+  { "OBS1", 0, 360, 0, 1, 30, 0, 0, TYPE_ANGLE }, // OBS1: from 0 to 360, slow=1, fast=30
+  { "NA2", 100, 200, 108000, 0, 0, 113000, 1, TYPE_FREQU }, // NAV2: from 108.000 to 118.00. No change allowed (factor=0)
+  { "NA2S", 100, 200, 108000, 50, 20, 113000, -1, TYPE_FREQU }, // NAV2-STB: from 108.000 to 118.00. slow=50Khz (200 steps), fast=20*50=1000Khz
+  { "OBS2", 180, 360, 0, 1, 30, 180, 0, TYPE_ANGLE }, // OBS2: from 0 to 360, slow=1, fast=30
+  { "ADF", 0, 1560, 190, 1, 100, 190, 0, TYPE_INTEG }, // ADF: from 190Hz to 1750Hz, slow=1Hz, fast=100Hz
+  { "TRANS", 0, 010000, 0, 1, 0100, 0, 0, TYPE_TRANS }, // TRANSPONDER: from 0 to 7777, slow=1, fast=100. Warning! Octal!
+  { "HDG", 0, 360, 0, 1, 30, 0, 0, TYPE_ANGLE }, // HDG: from 0 to 360, slow=1, fast=30
+  // { "BARO", 0, 120, 945, 1, 10, 945, 0, TYPE_FREQU } // BARO (hPA): from 945 to 1065, slow=1, fast=10
+  { "BARO", 0, 315, 2790, 1, 10, 2790, 0, TYPE_BARO } // BARO (inHg): from 2790 to 3105, slow=1, fast=10
 };
 // the value currently selected
 Value *currentValue;
@@ -214,7 +224,7 @@ void drawGenericPanel(Value *value1, Value *value2, Value *value3, Value *value4
      If focusOnFirst, the first group is currently selected
      If complete, redraw everything. If not, redraw only selection
   */
-  char buffer[6];
+  char buffer[TYPE_MAXCHARS + 1];
 
   if (complete) {
     // groups background
@@ -229,38 +239,74 @@ void drawGenericPanel(Value *value1, Value *value2, Value *value3, Value *value4
 
     myScreen.setTextSize(3);
     if (value2 != 0) {
-      ltoa(value1->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE1_OFFSET3);
-      ltoa(value2->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE2_OFFSET3);
+      formatNumber(value1->value, value1->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE1_OFFSET3);
+      formatNumber(value2->value, value2->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE2_OFFSET3);
     } else {
-      ltoa(value1->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE2_OFFSET3);
+      formatNumber(value1->value, value1->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE2_OFFSET3);
     }
     if (value4 != 0) {
-      ltoa(value3->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE3_OFFSET3);
-      ltoa(value4->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE4_OFFSET3);
+      formatNumber(value3->value, value3->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE3_OFFSET3);
+      formatNumber(value4->value, value4->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE4_OFFSET3);
     } else {
-      ltoa(value3->value, buffer, 10); myScreen.text(buffer, COLUMN2_OFFSET, LINE4_OFFSET3);
+      formatNumber(value3->value, value3->type, buffer); myScreen.text(buffer, COLUMN2_OFFSET, LINE4_OFFSET3);
     }
   }
 
   if (focusOnFirst) {
     if (value2 == 0) {
-      ltoa(value1->value, buffer, 10); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE2_ABS, LINE2_OFFSET3);
+      formatNumber(value1->value, value1->type, buffer); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE2_ABS, LINE2_OFFSET3);
     } else {
-      ltoa(value2->value, buffer, 10); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE2_ABS, LINE2_OFFSET3);
+      formatNumber(value2->value, value2->type, buffer); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE2_ABS, LINE2_OFFSET3);
     }
   } else {
     if (value4 == 0) {
-      ltoa(value3->value, buffer, 10); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE4_ABS, LINE4_OFFSET3);
+      formatNumber(value3->value, value3->type, buffer); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE4_ABS, LINE4_OFFSET3);
     } else {
-      ltoa(value4->value, buffer, 10); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE4_ABS, LINE4_OFFSET3);
+      formatNumber(value4->value, value4->type, buffer); updateSelection(buffer, PANEL_SELBK, PANEL_SELCO, LINE4_ABS, LINE4_OFFSET3);
     }
   }
 }
 
 void updateSelection(char *buffer, byte br, byte bg, byte bb, int sr, int sg, int sb, int y, int yt) {
+  /** A utility function to update only the currently selected value */
   myScreen.fill(br, bg, bb); myScreen.rect(COLUMN2, y, COLUMN2_WIDTH, LINE_HEIGHT);
   myScreen.stroke(sr, sg, sb); myScreen.text(buffer, COLUMN2_OFFSET, yt);
 }
+
+void formatNumber(long value, byte type, char *buffer) {
+  /** Formats a number:
+   *  TYPE_INTEG: 10->10
+   *  TYPE_FREQU: 188525 -> 188.52 (assumes 6 digits: COM1, NAV1...)
+   *  TYPE_ANGLE: 25 -> 025
+   *  TYPE_TRANS: 93 -> 0135
+   *  TYPE_BARO: 2992 -> 29.92 (assumes 4 digits: inHg) Use TYPE_INTEG for hPa
+   */
+  switch(type) {
+    case TYPE_INTEG:
+      ltoa(value, buffer, 10);
+      break;
+    case TYPE_FREQU:
+      ltoa(value, buffer, 10);
+      buffer[TYPE_MAXCHARS-1] = buffer[TYPE_MAXCHARS-2];
+      buffer[TYPE_MAXCHARS-2] = buffer[TYPE_MAXCHARS-3];
+      buffer[TYPE_MAXCHARS-3] = '.';
+      break;
+    case TYPE_BARO:
+      ltoa(value, buffer, 10);
+      buffer[TYPE_MAXCHARS-1] = 0;
+      buffer[TYPE_MAXCHARS-2] = buffer[TYPE_MAXCHARS-3];
+      buffer[TYPE_MAXCHARS-3] = buffer[TYPE_MAXCHARS-4];
+      buffer[TYPE_MAXCHARS-4] = '.';
+      break;
+    case TYPE_ANGLE:
+      sprintf(buffer, "%03d", value);
+      break;
+    case TYPE_TRANS:
+      sprintf(buffer, "%04o", value);
+      break;
+  }
+}
+
 
 void drawPanel(bool complete) {
   /** Draw the panel corresponding to the currently selected mode
@@ -375,7 +421,6 @@ void readInitialValues() {
   long newvalue;
   for(int i=0; i<MAX_MODES; i++) {
     newvalue = Serial.parseInt();
-    sendCommand("read", newvalue);
     setValue(&availableValues[i], newvalue);
   }
 }

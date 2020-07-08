@@ -60,6 +60,9 @@ class PanelinoController:
                 response = self.fgfs.sendAndGet(f'get {prop}').decode()
                 # response is: "PROPNAME = 'VALUE' (TYPE)"
                 value = int(float(response.split("'")[1]) * self.fields[field]['factor'])
+                # field TRANS is special: it is octal, and it must be converted into decimal
+                if field == 'TRANS':
+                    value = int(str(value), 8)
             except Exception as e:
                 value = 0
                 logging.warning(f'Cannot get value from prop: {prop} error={e}')
@@ -71,7 +74,10 @@ class PanelinoController:
         if name in self.fields:
             factor = self.fields[name]['factor']
             prop = self.fields[name]['prop']
-            newvalue = float(value) / factor
+            if name == 'TRANS':  # special property: the Arduino sends the value en decimal, we must convert to octal without preffix
+              newvalue = oct(int(value))[2:]
+            else:
+              newvalue = float(value) / factor
             logging.info(f"{name}: {prop}={newvalue}")
             self.fgfs.send(f'set {prop} {newvalue}')
 
