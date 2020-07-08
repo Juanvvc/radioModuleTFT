@@ -2,6 +2,8 @@ A driver for an Arduino radio control panel (TFT version) for FlightGear, the op
 
 The Arduino source code is in `radioPanelTFT.ino`. Check the headers for building instructions.
 
+Note: `radioPanel7S.ino` is an old version that worked with five 7-segment modules. Provided for reference.
+
 # Installation
 
 In Windows, install Python3 from the Microsoft store.
