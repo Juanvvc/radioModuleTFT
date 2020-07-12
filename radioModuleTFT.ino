@@ -1,6 +1,6 @@
 
 /* A Radio/Nav/Hdg/Baro controller for an Arduino Uno/Micro with woth encoders and a the TFT shield
-Juan Vera, July 2020 */
+  Juan Vera, July 2020 */
 
 
 #include <TFT.h> // Hardware-specific library
@@ -156,6 +156,21 @@ Value availableValues[MAX_MODES] = {
 // the value currently selected
 Value *currentValue;
 
+void setup() {
+  Serial.begin(9600);
+
+  myScreen.begin();
+  myScreen.background(0, 0, 0); // clear the screen
+  myScreen.stroke(255, 255, 255);
+
+  // buttons
+  pinMode(leftButton.pin, INPUT_PULLUP);
+  pinMode(rightButton.pin, INPUT_PULLUP);
+
+  // load the first editable mode
+  selectNextEditableMode(1);
+}
+
 bool buttonClicked(Button *b) {
   /* Returns true only on the event CLICK_DOWN */
   int reading = digitalRead(b->pin);
@@ -197,23 +212,6 @@ bool updateValue(Value *k, int move) {
   // calculate value
   (k->value) = (k->offset) + newposition * (k->factor);
   return true;
-}
-
-void setup() {
-  Serial.begin(9600);
-
-  Serial.println("status=setup");
-
-  myScreen.begin();
-  myScreen.background(0, 0, 0); // clear the screen
-  myScreen.stroke(255, 255, 255);
-
-  // buttons
-  pinMode(leftButton.pin, INPUT_PULLUP);
-  pinMode(rightButton.pin, INPUT_PULLUP);
-
-  // load the first editable mode
-  selectNextEditableMode(1);
 }
 
 void drawGenericPanel(Value *value1, Value *value2, Value *value3, Value *value4, boolean focusOnFirst, boolean complete) {
@@ -275,28 +273,28 @@ void updateSelection(char *buffer, byte br, byte bg, byte bb, int sr, int sg, in
 
 void formatNumber(long value, byte type, char *buffer) {
   /** Formats a number:
-   *  TYPE_INTEG: 10->10
-   *  TYPE_FREQU: 188525 -> 188.52 (assumes 6 digits: COM1, NAV1...)
-   *  TYPE_ANGLE: 25 -> 025
-   *  TYPE_TRANS: 93 -> 0135
-   *  TYPE_BARO: 2992 -> 29.92 (assumes 4 digits: inHg) Use TYPE_INTEG for hPa
-   */
-  switch(type) {
+      TYPE_INTEG: 10->10
+      TYPE_FREQU: 188525 -> 188.52 (assumes 6 digits: COM1, NAV1...)
+      TYPE_ANGLE: 25 -> 025
+      TYPE_TRANS: 93 -> 0135
+      TYPE_BARO: 2992 -> 29.92 (assumes 4 digits: inHg) Use TYPE_INTEG for hPa
+  */
+  switch (type) {
     case TYPE_INTEG:
       ltoa(value, buffer, 10);
       break;
     case TYPE_FREQU:
       ltoa(value, buffer, 10);
-      buffer[TYPE_MAXCHARS-1] = buffer[TYPE_MAXCHARS-2];
-      buffer[TYPE_MAXCHARS-2] = buffer[TYPE_MAXCHARS-3];
-      buffer[TYPE_MAXCHARS-3] = '.';
+      buffer[TYPE_MAXCHARS - 1] = buffer[TYPE_MAXCHARS - 2];
+      buffer[TYPE_MAXCHARS - 2] = buffer[TYPE_MAXCHARS - 3];
+      buffer[TYPE_MAXCHARS - 3] = '.';
       break;
     case TYPE_BARO:
       ltoa(value, buffer, 10);
-      buffer[TYPE_MAXCHARS-1] = 0;
-      buffer[TYPE_MAXCHARS-2] = buffer[TYPE_MAXCHARS-3];
-      buffer[TYPE_MAXCHARS-3] = buffer[TYPE_MAXCHARS-4];
-      buffer[TYPE_MAXCHARS-4] = '.';
+      buffer[TYPE_MAXCHARS - 1] = 0;
+      buffer[TYPE_MAXCHARS - 2] = buffer[TYPE_MAXCHARS - 3];
+      buffer[TYPE_MAXCHARS - 3] = buffer[TYPE_MAXCHARS - 4];
+      buffer[TYPE_MAXCHARS - 4] = '.';
       break;
     case TYPE_ANGLE:
       sprintf(buffer, "%03d", value);
@@ -414,12 +412,12 @@ void swapFreqs() {
 
 void readInitialValues() {
   /* Read initial values from the serial connection.
-   *  Valuas are a list of integers separated using any non-numeric number (spaces or new line, for example).
-   *  The number and order is exactly the same than knobAvailableData
-   *  Example: 123450 118150 123450 118150 102025 102025 0 102050 102050 180 90 1015
-   */
+      Valuas are a list of integers separated using any non-numeric number (spaces or new line, for example).
+      The number and order is exactly the same than knobAvailableData
+      Example: 123450 118150 123450 118150 102025 102025 0 102050 102050 180 90 1015
+  */
   long newvalue;
-  for(int i=0; i<MAX_MODES; i++) {
+  for (int i = 0; i < MAX_MODES; i++) {
     newvalue = Serial.parseInt();
     setValue(&availableValues[i], newvalue);
   }
@@ -448,7 +446,7 @@ void loop() {
   }
 
   // if there is available data in the serial port, read it
-  if(Serial.available() > 0) {
+  if (Serial.available() > 0) {
     readInitialValues();
     drawPanel(true);
   }
