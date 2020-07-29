@@ -7,9 +7,16 @@ You can control:
 - Radio frequencies: COM1, COM2, NAV1, NAV2 (and their standby freqs); ADF (only current); Transponder.
 - Dials: Course in the HI; radials of the OBS1, OBS2; QNH for the barometer.
 
-The Arduino source code is in `radioPanelTFT.ino`. Check the headers for building instructions and pin configuration.
+# Souce code
 
-Note: `radioPanel7S.old` is an old version that worked with five 7-segment modules. Provided for reference.
+The Arduino source code is in `radioPanelTFT.ino`. Check the headers for building instructions and pin configuration.
+`radioPanel7S.old` is an old version that worked with five 7-segment modules. Provided for reference.
+
+Several themes are available, but you must build the project to select one or the other: white on blue, green on black, orante on black.
+
+`radioModule.py` is a Python dirver. You must run this driver in your PC. Windows are Linux are supported. See below.
+
+All the source code and resources is under the GPL.
 
 # Installation
 
@@ -38,5 +45,5 @@ Check the serial port for your system. `COM3` and `COM4` are typical serial port
 `/dev/ttyUSB0` or `/dev/ttyUSB1` are typical in Linux. A configuration file for the C172P aircraft is provided,
 but most FA aircraft will be compatible with this configuration file.
 
-- Right encoder: change selected item (COM, NAV, OBS...). Push: swap frequencies (in the modes that allow swapping: COM and NAV)
-- Left encoder: change selected value. Push: toggle "small/big step" mode.
+- Left encoder: change selected item (COM-STB, NAV-STB, OBS...). Push: swap frequencies (in the modes that allow swapping: COM and NAV)
+- Right encoder: change selected value. Push: toggle "small/big step" mode.
