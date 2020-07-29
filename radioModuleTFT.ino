@@ -9,19 +9,28 @@
 
 ///////////////////////////// PINS
 
+// The TFT uses SPI: pins 8-13 an Arduino UNO: (8-12): Reset, D/C, LCD-CS, MOSI, SCK, MISO. SD-CS and Backlight are not connected
+// Right encoder: uses pins 3 to 7 (to prevent soldering, I'm connecting VCC and GND to data pins)
+// Left encoder: used pins A0 to A4
+
 // I'm using the now retired TFT shield: https://www.arduino.cc/en/Guide/TFT
+// Documentation: https://www.arduino.cc/en/Guide/TFTtoBoards
 #define TFT_CS   10
 #define TFT_DC   9
 #define TFT_RESET  8
-// This TFT uses SPI. At the end, the TFT shield it uses pins 8-13 and 4 on an Arduino UNO
-// On an Arduino Micro, some of the SPI pins are accessed through the ICSP interface.
-// Documentation: https://www.arduino.cc/en/Guide/TFTtoBoards
-#define LEFT_ENCODER_BUTTON A3
-#define LEFT_ENCODER_A A5
-#define LEFT_ENCODER_B A4
-#define RIGHT_ENCODER_BUTTON A2
-#define RIGHT_ENCODER_A A0
-#define RIGHT_ENCODER_B A1
+// The SPI pins are defined in the SPI librery and cannot be changed
+
+#define LEFT_ENCODER_BUTTON A2
+#define LEFT_ENCODER_A A4
+#define LEFT_ENCODER_B A3
+#define LEFT_ENCODER_VCC A1
+#define LEFT_ENCODER_GND A0
+
+#define RIGHT_ENCODER_BUTTON 5
+#define RIGHT_ENCODER_A 7
+#define RIGHT_ENCODER_B 6
+#define RIGHT_ENCODER_VCC 4
+#define RIGHT_ENCODER_GND 3
 
 
 /////////////////////////////// THEMES
@@ -46,15 +55,23 @@
 #define COLUMN2_OFFSET 52
 #define SCREEN_WIDTH myScreen.width()
 
-// Blue theme
-#define BACKGROUND 0,0,0
-#define PANEL_BK 0,0,255
-#define PANEL_COLOR 255,255,255
-#define PANEL_BORDER 255,255,255
-#define PANEL_SELBK 255,255,255
-#define PANEL_SELCO 0,0,0
+// White on blue theme
+//#define BACKGROUND 0,0,0
+//#define PANEL_BK 0,0,255
+//#define PANEL_COLOR 255,255,255
+//#define PANEL_BORDER 255,255,255
+//#define PANEL_SELBK 255,255,255
+//#define PANEL_SELCO 0,0,0
 
-// Green theme
+// White on orange theme
+//#define BACKGROUND 0,0,0
+//#define PANEL_BK 255,50,0
+//#define PANEL_COLOR 255,255,255
+//#define PANEL_BORDER 255,255,255
+//#define PANEL_SELBK 255,255,255
+//#define PANEL_SELCO 0,0,0
+
+// White on green theme
 //#define BACKGROUND 0,0,0
 //#define PANEL_BK 0,150,0
 //#define PANEL_COLOR 255,255,255
@@ -62,13 +79,21 @@
 //#define PANEL_SELBK 255,255,255
 //#define PANEL_SELCO 0,0,0
 
-// Red theme
+// Orange on black theme
 //#define BACKGROUND 0,0,0
 //#define PANEL_BK 0,0,0
 //#define PANEL_COLOR 255,200,0
 //#define PANEL_BORDER 255,255,255
 //#define PANEL_SELBK 255,255,255
 //#define PANEL_SELCO 0,0,0
+
+// Green on black theme
+#define BACKGROUND 0,0,0
+#define PANEL_BK 0,0,0
+#define PANEL_COLOR 200,255,0
+#define PANEL_BORDER 255,255,255
+#define PANEL_SELBK 255,255,255
+#define PANEL_SELCO 0,0,0
 
 #define COLUMN2_WIDTH 110
 
@@ -163,9 +188,15 @@ void setup() {
   myScreen.background(0, 0, 0); // clear the screen
   myScreen.stroke(255, 255, 255);
 
+  // prepare enconders
   // buttons
   pinMode(leftButton.pin, INPUT_PULLUP);
   pinMode(rightButton.pin, INPUT_PULLUP);
+  // to prevent soldering, I'm connecting VCC and GND to data pins
+  pinMode(LEFT_ENCODER_VCC, OUTPUT); digitalWrite(LEFT_ENCODER_VCC, 1);
+  pinMode(LEFT_ENCODER_GND, OUTPUT); digitalWrite(LEFT_ENCODER_GND, 0);
+  pinMode(RIGHT_ENCODER_VCC, OUTPUT); digitalWrite(RIGHT_ENCODER_VCC, 1);
+  pinMode(RIGHT_ENCODER_GND, OUTPUT); digitalWrite(RIGHT_ENCODER_GND, 0);
 
   // load the first editable mode
   selectNextEditableMode(1);
@@ -447,6 +478,8 @@ void loop() {
 
   // if there is available data in the serial port, read it
   if (Serial.available() > 0) {
+    // TODO: the arduino seems to RESET when new data is avaible, I don't know why.
+    // I'd like to show a "loading" screen while receiving data (2-3 seconds), but the "loading" screen is never shown    
     readInitialValues();
     drawPanel(true);
   }
