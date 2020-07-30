@@ -35,7 +35,7 @@ You need running these commands only once.
 
 # Running
 
-Run Flightgear with `--telnet 9000`. Once FlightGear is loaded, run:
+Run Flightgear with `--telnet 9000`. Once FlightGear is fully loaded, run:
 
 ```
 python3 radioModule.py --host localhost --port 9000 --serial COM3 --conf c172p.ini
@@ -45,5 +45,8 @@ Check the serial port for your system. `COM3` and `COM4` are typical serial port
 `/dev/ttyUSB0` or `/dev/ttyUSB1` are typical in Linux. A configuration file for the C172P aircraft is provided,
 but most FA aircraft will be compatible with this configuration file.
 
-- Left encoder: change selected item (COM-STB, NAV-STB, OBS...). Push: swap frequencies (in the modes that allow swapping: COM and NAV)
-- Right encoder: change selected value. Push: toggle "small/big step" mode.
+The driver reads the current configuration for freqs in FlightGear and loads this configuration in the Arduino panel. Warning: after the initial reading, the panel is one-way only. If you change freqs using any other method (the main FG window, dialogs, Phi...), these changes are not reflected in the Arduino panel.
+
+- Left encoder: change the currently selected item (COM-STB, NAV-STB, OBS...). Push: in the items that allow swapping (COM and NAV), swap frequencies.
+- Right encoder: change selected value. Push: toggle "small/big step".
+
