@@ -47,6 +47,6 @@ but most FA aircraft will be compatible with this configuration file.
 
 The driver reads the current configuration for freqs in FlightGear and loads this configuration in the Arduino panel. Warning: after the initial reading, the panel is one-way only. If you change freqs using any other method (the main FG window, dialogs, Phi...), these changes are not reflected in the Arduino panel.
 
-- Left encoder: change the currently selected item (COM-STB, NAV-STB, OBS...). Push: in the items that allow swapping (COM and NAV), swap frequencies.
+- Left encoder: change the currently selected item (COM1-STB -> COM2-STB -> NAV1-STB -> OBS1 -> NAV2-STB -> OBS2 -> ADF -> Transponder -> HDG -> BARO). Push: in the items that allow swapping (COM and NAV), swap frequencies.
 - Right encoder: change selected value. Push: toggle "small/big step".
 
